@@ -2,6 +2,10 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
+using Microsoft.AspNetCore.Mvc;
+
+using ToDoList.Api.DTOs.Common;
+
 using Microsoft.EntityFrameworkCore;
 using ToDoList.Api.Data;
 
@@ -48,7 +52,31 @@ builder.Services
 builder.Services.AddAuthentication();
 
 // Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            // Собираем ошибки в словарь: { "Title": ["поле обязательно"] }
+            var details = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors
+                                     .Select(e => e.ErrorMessage)
+                                     .ToArray()
+                );
+
+            var response = ApiResponse<object>.Fail(
+                ErrorCodes.ValidationError,
+                "One or more validation errors occurred.",
+                details
+            );
+
+            return new BadRequestObjectResult(response);
+        };
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

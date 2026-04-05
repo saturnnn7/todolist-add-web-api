@@ -6,25 +6,25 @@ using ToDoList.Api.DTOs.Todo;
 using ToDoList.Api.Models.Enums;
 using ToDoList.Api.Services.Interfaces;
 
+using ToDoList.Api.DTOs.Common;
+
 namespace ToDoList.Api.Controllers;
 
 [ApiController]
 [Route("api/todos")]
 [Authorize]
-public class TodoController : ControllerBase
+[Produces("application/json")]
+public class TodoController : BaseController
 {
     private readonly ITodoService _todoService;
     public TodoController(ITodoService todoService) => _todoService = todoService;
-
-    // ----------------------------------------------
-    // UserId from JWT
-    private Guid GetUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     // ----------------------------------------------
 
     // Get Todos List with filters, sorting, pagination
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponseDto<TodoResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(401)]
     public async Task<IActionResult> GetAll(
         [FromQuery] bool?        IsCompleted = null,
         [FromQuery] Priority?    priority    = null,
@@ -44,7 +44,7 @@ public class TodoController : ControllerBase
             page,
             pageSize);
         
-        return Ok(result);
+        return OkResponse(result);
     }
 
     [HttpGet("{id:guid}")]
@@ -55,8 +55,8 @@ public class TodoController : ControllerBase
         var result = _todoService.GetByIdAsync(id, GetUserId());
 
         return result is null
-            ? NotFound(new { message = "Todo not found." })
-            : Ok(result);
+            ? NotFoundResponse("Todo not found.")
+            : OkResponse(result);
     }
 
     [HttpPost]
@@ -66,7 +66,7 @@ public class TodoController : ControllerBase
     {
         var result = await _todoService.CreateAsync(GetUserId(), dto);
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        return CreatedResponse(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:guid}")]
@@ -78,8 +78,8 @@ public class TodoController : ControllerBase
         var result = await _todoService.UpdateAsync(id, GetUserId(), dto);
 
         return result is null
-            ? NotFound(new { message = "Todo not found."})
-            : Ok(result);
+            ? NotFoundResponse("Todo not found.")
+            : OkResponse(result);
     }
 
     [HttpPatch("{id:guid}/toggle")]
@@ -90,8 +90,8 @@ public class TodoController : ControllerBase
         var deleted = await _todoService.DeleteAsync(id, GetUserId());
 
         return deleted
-            ? NoContent()
-            : NotFound(new { message = "Todo not found." });
+            ? NoContentResponse()
+            : NotFoundResponse("Todo not found." );
     }
 }
 

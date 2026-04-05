@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Api.DTOs.Auth;
 using ToDoList.Api.Services.Interfaces;
+
+using ToDoList.Api.DTOs.Common;
 
 namespace ToDoList.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+[AllowAnonymous]
+[Produces("application/json")]
+public class AuthController : BaseController
 {
     private readonly IAuthService _authService;
     public AuthController(IAuthService authService) => _authService = authService;
@@ -21,11 +26,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.RegisterAsync(dto);
-            return StatusCode(201, result);
+            return CreatedResponse(nameof(Register), null!, result);
         }
         catch (InvalidOperationException ex)
         {
-            return Conflict(new { message = ex.Message });
+            return ConflictResponse(ex.Message);
         }
     }
 
@@ -38,11 +43,11 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.LoginAsync(dto);
-            return Ok(result);
+            return OkResponse(result);
         }
-        catch (UnauthorizedAccessException  ex)
+        catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return UnauthorizedResponse(ex.Message);
         }
     }
 }

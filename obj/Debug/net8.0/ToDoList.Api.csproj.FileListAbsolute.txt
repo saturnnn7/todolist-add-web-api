@@ -135,3 +135,4 @@ D:\aprojects\!roadmap\ASP.NET\webapi\ToDoList.Api\obj\Debug\net8.0\refint\ToDoLi
 D:\aprojects\!roadmap\ASP.NET\webapi\ToDoList.Api\obj\Debug\net8.0\ToDoList.Api.pdb
 D:\aprojects\!roadmap\ASP.NET\webapi\ToDoList.Api\obj\Debug\net8.0\ToDoList.Api.genruntimeconfig.cache
 D:\aprojects\!roadmap\ASP.NET\webapi\ToDoList.Api\obj\Debug\net8.0\ref\ToDoList.Api.dll
+D:\aprojects\!roadmap\ASP.NET\webapi\ToDoList.Api\obj\Debug\net8.0\ToDoList.Api.sourcelink.json
